@@ -3,126 +3,216 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="キングショット装備計算ツール - 複数部位の装備強化に必要な素材を計算します。装備計算と宝石計算に対応。">
-  <meta name="keywords" content="キングショット,装備計算,宝石計算,ゲーム,計算ツール">
-  <meta property="og:title" content="キングショット装備計算ツール - Lord Gear Calculator Pro">
-  <meta property="og:description" content="複数部位の装備強化に必要な素材を計算します。装備計算と宝石計算に対応。">
+  <meta name="description" content="キングショット計算ツール総合サイト - 装備計算、宝石計算、戦闘シミュレーターを一つのサイトで提供">
+  <meta name="keywords" content="キングショット,装備計算,宝石計算,戦闘シミュレーター,ゲーム,計算ツール">
+  <meta property="og:title" content="キングショット計算ツール総合サイト">
+  <meta property="og:description" content="装備計算、宝石計算、戦闘シミュレーターを一つのサイトで提供">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://kingshot-bj.github.io/kingshot-calculator/">
-  <title>キングショット装備計算ツール - Lord Gear Calculator Pro</title>
-  <link rel="stylesheet" href="styles/main.css">
-  <link rel="stylesheet" href="styles/dark-mode.css">
+  <meta property="og:url" content="https://kingshot-bj.github.io/">
+  <title>キングショット計算ツール総合サイト</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      width: 100%;
+    }
+
+    header {
+      text-align: center;
+      color: white;
+      margin-bottom: 50px;
+    }
+
+    h1 {
+      font-size: 3em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .subtitle {
+      font-size: 1.2em;
+      opacity: 0.9;
+      margin-bottom: 30px;
+    }
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin-bottom: 50px;
+    }
+
+    .tool-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tool-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .tool-header {
+      padding: 30px 20px;
+      text-align: center;
+      font-size: 3em;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .tool-content {
+      padding: 25px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tool-title {
+      font-size: 1.5em;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .tool-description {
+      color: #666;
+      margin-bottom: 20px;
+      flex: 1;
+      line-height: 1.6;
+    }
+
+    .tool-link {
+      display: inline-block;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+      text-align: center;
+      transition: opacity 0.3s ease;
+    }
+
+    .tool-link:hover {
+      opacity: 0.9;
+    }
+
+    .ad-container {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      color: #999;
+      margin-bottom: 30px;
+      min-height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    footer {
+      text-align: center;
+      color: white;
+      margin-top: 50px;
+      opacity: 0.8;
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2em;
+      }
+
+      .tools-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .tool-header {
+        font-size: 2em;
+      }
+    }
+  </style>
 </head>
 <body>
-  <div id="app">
-    <!-- ナビゲーション -->
-    <nav class="navbar">
-      <div class="navbar-container">
-        <div class="navbar-brand">
-          <div class="brand-content">
-            <div class="brand-text">
-              <h1>⚔️ キングショット</h1>
-              <p class="subtitle">装備計算ツール</p>
-            </div>
-          </div>
-        </div>
-        <div class="navbar-controls">
-          <button id="theme-toggle" class="btn-icon" title="ダークモード切り替え">
-            <span class="icon">🌙</span>
-          </button>
-        </div>
-      </div>
-    </nav>
+  <div class="container">
+    <header>
+      <h1>⚔️ キングショット計算ツール総合サイト</h1>
+      <p class="subtitle">装備計算、宝石計算、戦闘シミュレーターを一つのサイトで提供</p>
+    </header>
 
-    <!-- タブナビゲーション -->
-    <div class="tabs-container">
-      <div class="tabs" id="calculator-tabs">
-        <!-- タブはJavaScriptで動的に生成される -->
-      </div>
+    <!-- 上部広告 -->
+    <div class="ad-container">
+      広告スペース (728×90)
     </div>
 
-    <!-- メインコンテンツ -->
-    <main class="main-content">
-      <!-- 上部広告 -->
-      <div class="ad-container" id="ad-top">
-        <div class="ad-placeholder">広告スペース（728x90）</div>
-      </div>
-
-      <div class="container-layout">
-        <!-- 左側：計算フォーム -->
-        <div class="layout-left">
-          <!-- 計算ツールのコンテンツ -->
-          <div id="calculator-content"></div>
-          
-          <!-- 中部広告 -->
-          <div class="ad-container" id="ad-middle">
-            <div class="ad-placeholder">広告スペース（300x250）</div>
+    <div class="tools-grid">
+      <!-- 装備計算ツール -->
+      <a href="./kingshot-calculator/" class="tool-card">
+        <div class="tool-header">🛡️</div>
+        <div class="tool-content">
+          <div class="tool-title">装備計算ツール</div>
+          <div class="tool-description">
+            複数部位の装備強化に必要な素材を計算します。効率的に装備を強化するための必須ツール。
           </div>
+          <a href="./kingshot-calculator/" class="tool-link">計算ツールへ</a>
         </div>
-        <!-- 右側：計算結果 -->
-        <div class="layout-right">
-          <!-- 計算結果はここに表示される -->
-          
-          <!-- サイド広告 -->
-          <div class="ad-container" id="ad-side">
-            <div class="ad-placeholder">広告スペース（300x600）</div>
+      </a>
+
+      <!-- 宝石計算ツール -->
+      <a href="./kingshot-calculator/?tool=jewel" class="tool-card">
+        <div class="tool-header">💎</div>
+        <div class="tool-content">
+          <div class="tool-title">宝石計算ツール</div>
+          <div class="tool-description">
+            宝石の強化に必要な素材を計算します。最適な宝石構成を見つけるのに役立ちます。
           </div>
+          <a href="./kingshot-calculator/?tool=jewel" class="tool-link">計算ツールへ</a>
         </div>
-      </div>
-      
-      <!-- 下部広告 -->
-      <div class="ad-container" id="ad-bottom">
-        <div class="ad-placeholder">広告スペース（728x90）</div>
-      </div>
-    </main>
+      </a>
 
-    <!-- サイドパネル（履歴・設定） -->
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-header">
-        <h3>計算履歴</h3>
-        <button class="btn-close" id="sidebar-close">✕</button>
-      </div>
-      <div class="sidebar-content" id="history-content">
-        <!-- 履歴がここに表示される -->
-      </div>
-    </aside>
+      <!-- 戦闘シミュレーター -->
+      <a href="./frakinator/" class="tool-card">
+        <div class="tool-header">⚔️</div>
+        <div class="tool-content">
+          <div class="tool-title">戦闘シミュレーター</div>
+          <div class="tool-description">
+            勝利確率を予測し、最適な兵種構成を見つけるツール。戦闘の勝敗を事前に予測できます。
+          </div>
+          <a href="./frakinator/" class="tool-link">シミュレーターへ</a>
+        </div>
+      </a>
+    </div>
 
-    <!-- フッター -->
-    <footer class="footer">
-      <p>&copy; 2026 Lord Gear Calculator Pro | キングショット装備計算ツール</p>
+    <!-- 中部広告 -->
+    <div class="ad-container">
+      広告スペース (300×250)
+    </div>
+
+    <footer>
+      <p>&copy; 2026 キングショット計算ツール総合サイト | すべてのツールは無料でご利用いただけます</p>
     </footer>
   </div>
-
-  <!-- Google AdSense -->
-  <!-- 注意：Google AdSenseコードを設定してください -->
-  <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-xxxxxxxxxxxxxxxx"
-     crossorigin="anonymous"></script> -->
-
-  <!-- 広告スクリプト -->
-  <script>
-    // Google AdSense設定用スクリプト
-    window.adConfig = {
-      topAd: 'ad-top',
-      middleAd: 'ad-middle',
-      sideAd: 'ad-side',
-      bottomAd: 'ad-bottom'
-    };
-
-    // Google AdSenseを設定した場合、以下のコードを実行してください：
-    /*
-    (adsbygoogle = window.adsbygoogle || []).push({
-      google_ad_client: "ca-pub-xxxxxxxxxxxxxxxx",
-      enable_page_level_ads: true
-    });
-    */
-  </script>
-
-  <!-- スクリプト -->
-  <script src="js/core/calculator-engine.js"></script>
-  <script src="js/core/storage-manager.js"></script>
-  <script src="js/core/ui-manager.js"></script>
-  <script src="js/tools/equipment-calculator.js"></script>
-  <script src="js/tools/jewel-calculator.js"></script>
-  <script src="js/app.js"></script>
 </body>
 </html>

@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Kingshot戦闘シミュレーター - 勝利確率を予測し、最適な兵種構成を見つけるツール">
+  <meta name="keywords" content="キングショット,戦闘シミュレーター,勝率計算,兵種構成">
+  <title>Kingshot戦闘シミュレーター</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to bottom, #0f172a, #1e293b, #0f172a);
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(to right, #06b6d4, #3b82f6);
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+
+    .ad-top {
+      background: #1e293b;
+      padding: 1rem;
+      text-align: center;
+      color: #64748b;
+      margin: 1rem 0;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card h2 {
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+      color: #06b6d4;
+    }
+
+    .card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.8rem;
+      color: #cbd5e1;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: #334155;
+      color: #e2e8f0;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .tab-btn.active {
+      background: #06b6d4;
+    }
+
+    .tab-btn:hover {
+      background: #475569;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 0.5rem;
+    }
+
+    input[type="number"],
+    input[type="text"] {
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: #e2e8f0;
+      padding: 0.5rem;
+      border-radius: 0.25rem;
+      width: 100%;
+    }
+
+    input[type="number"]:focus,
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #06b6d4;
+      box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.1);
+    }
+
+    .btn {
+      background: #06b6d4;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+
+    .btn:hover {
+      background: #0891b2;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .result-box {
+      background: linear-gradient(135deg, #166534, #15803d);
+      border: 1px solid #22c55e;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .result-box h3 {
+      color: #86efac;
+      margin-bottom: 0.5rem;
+    }
+
+    .result-value {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #4ade80;
+    }
+
+    .result-yellow {
+      background: linear-gradient(135deg, #854d0e, #b45309);
+      border-color: #fbbf24;
+    }
+
+    .result-yellow h3 {
+      color: #fcd34d;
+    }
+
+    .result-yellow .result-value {
+      color: #fbbf24;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 300px;
+      margin-bottom: 1rem;
+    }
+
+    .guide {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .guide h2 {
+      color: #06b6d4;
+      margin-bottom: 1rem;
+    }
+
+    .guide-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+
+    .guide-item {
+      background: #0f172a;
+      padding: 1rem;
+      border-radius: 0.25rem;
+      border-left: 3px solid #06b6d4;
+    }
+
+    .guide-item .step {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #06b6d4;
+      margin-bottom: 0.5rem;
+    }
+
+    .guide-item h3 {
+      color: #cbd5e1;
+      margin-bottom: 0.5rem;
+    }
+
+    .guide-item p {
+      color: #94a3b8;
+      font-size: 0.9rem;
+    }
+
+    .ad-bottom {
+      background: #1e293b;
+      padding: 1rem;
+      text-align: center;
+      color: #64748b;
+      margin: 2rem 0;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: #64748b;
+      border-top: 1px solid #334155;
+    }
+
+    @media (max-width: 1024px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 1.8rem;
+      }
+
+      .form-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>⚔️ Kingshot戦闘シミュレーター</h1>
+    <p>勝利確率を予測し、最適な兵種構成を見つけるツール</p>
+  </header>
+
+  <div class="ad-top">
+    広告スペース (728×90)
+  </div>
+
+  <div class="container">
+    <div class="main-grid">
+      <!-- 左側：入力フォーム -->
+      <div>
+        <!-- 試験モード選択 -->
+        <div class="card">
+          <h2>📋 試験モード選択</h2>
+          <div class="tabs" id="battleModes">
+            <button class="tab-btn active" data-mode="mystic">✨ 神秘の試練</button>
+            <button class="tab-btn" data-mode="bear">🐻 クマ狩り</button>
+            <button class="tab-btn" data-mode="baron">🩸 血の男爵</button>
+            <button class="tab-btn" data-mode="custom">⚙️ カスタム</button>
+          </div>
+        </div>
+
+        <!-- クイックプリセット -->
+        <div class="card">
+          <h2>クイックプリセット</h2>
+          <div class="btn-group">
+            <button class="btn" onclick="applyPreset('balanced')">バランス型</button>
+            <button class="btn" onclick="applyPreset('offensive')">攻撃型</button>
+            <button class="btn" onclick="applyPreset('defensive')">防御型</button>
+          </div>
+        </div>
+
+        <!-- 自分のステータス -->
+        <div class="card">
+          <h2>自分のステータス</h2>
+          <div>
+            <h3>🏃 歩兵</h3>
+            <div class="form-group">
+              <div class="form-row">
+                <input type="number" id="playerInfantryCount" placeholder="兵数" value="50000">
+                <input type="number" id="playerInfantryAttack" placeholder="攻撃" value="100">
+                <input type="number" id="playerInfantryDefense" placeholder="防御" value="100">
+                <input type="number" id="playerInfantryLethality" placeholder="致命性" value="100">
+                <input type="number" id="playerInfantryHealth" placeholder="体力" value="100">
+              </div>
+            </div>
+
+            <h3>🐴 騎兵</h3>
+            <div class="form-group">
+              <div class="form-row">
+                <input type="number" id="playerCavalryCount" placeholder="兵数" value="50000">
+                <input type="number" id="playerCavalryAttack" placeholder="攻撃" value="100">
+                <input type="number" id="playerCavalryDefense" placeholder="防御" value="100">
+                <input type="number" id="playerCavalryLethality" placeholder="致命性" value="100">
+                <input type="number" id="playerCavalryHealth" placeholder="体力" value="100">
+              </div>
+            </div>
+
+            <h3>🏹 弓兵</h3>
+            <div class="form-group">
+              <div class="form-row">
+                <input type="number" id="playerArcheryCount" placeholder="兵数" value="50000">
+                <input type="number" id="playerArcheryAttack" placeholder="攻撃" value="100">
+                <input type="number" id="playerArcheryDefense" placeholder="防御" value="100">
+                <input type="number" id="playerArcheryLethality" placeholder="致命性" value="100">
+                <input type="number" id="playerArcheryHealth" placeholder="体力" value="100">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 相手のステータス -->
+        <div class="card">
+          <h2>相手のステータス</h2>
+          <div>
+            <h3>🏃 歩兵</h3>
+            <div class="form-group">
+              <div class="form-row">
+                <input type="number" id="opponentInfantryCount" placeholder="兵数" value="60000">
+                <input type="number" id="opponentInfantryAttack" placeholder="攻撃" value="100">
+                <input type="number" id="opponentInfantryDefense" placeholder="防御" value="100">
+                <input type="number" id="opponentInfantryLethality" placeholder="致命性" value="100">
+                <input type="number" id="opponentInfantryHealth" placeholder="体力" value="100">
+              </div>
+            </div>
+
+            <h3>🐴 騎兵</h3>
+            <div class="form-group">
+              <div class="form-row">
+                <input type="number" id="opponentCavalryCount" placeholder="兵数" value="45000">
+                <input type="number" id="opponentCavalryAttack" placeholder="攻撃" value="100">
+                <input type="number" id="opponentCavalryDefense" placeholder="防御" value="100">
+                <input type="number" id="opponentCavalryLethality" placeholder="致命性" value="100">
+                <input type="number" id="opponentCavalryHealth" placeholder="体力" value="100">
+              </div>
+            </div>
+
+            <h3>🏹 弓兵</h3>
+            <div class="form-group">
+              <div class="form-row">
+                <input type="number" id="opponentArcheryCount" placeholder="兵数" value="40000">
+                <input type="number" id="opponentArcheryAttack" placeholder="攻撃" value="100">
+                <input type="number" id="opponentArcheryDefense" placeholder="防御" value="100">
+                <input type="number" id="opponentArcheryLethality" placeholder="致命性" value="100">
+                <input type="number" id="opponentArcheryHealth" placeholder="体力" value="100">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- シミュレーション設定 -->
+        <div class="card">
+          <h2>シミュレーション設定</h2>
+          <div class="form-group">
+            <label>シミュレーション回数</label>
+            <input type="number" id="numberOfBattles" value="1000" min="100" max="10000" step="100">
+          </div>
+          <button class="btn" onclick="calculateBattle()" style="width: 100%; padding: 1rem;">計算する</button>
+        </div>
+      </div>
+
+      <!-- 右側：結果表示 -->
+      <div>
+        <div class="ad-side" style="background: #1e293b; border: 1px solid #334155; border-radius: 0.5rem; padding: 1rem; text-align: center; color: #64748b; min-height: 400px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
+          広告スペース (300×600)
+        </div>
+
+        <div id="resultsContainer" style="display: none;">
+          <!-- 勝率 -->
+          <div class="result-box">
+            <h3>勝率</h3>
+            <div class="result-value" id="winRateValue">0%</div>
+          </div>
+
+          <!-- 期待ダメージ -->
+          <div class="result-box result-yellow">
+            <h3>期待ダメージ</h3>
+            <div class="result-value" id="expectedDamageValue">0</div>
+          </div>
+
+          <!-- 兵種別ダメージ分析 -->
+          <div class="card">
+            <h3>兵種別ダメージ分析</h3>
+            <div class="chart-container">
+              <canvas id="damageChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 使い方ガイド -->
+    <div class="guide">
+      <h2>📖 使い方ガイド</h2>
+      <div class="guide-grid">
+        <div class="guide-item">
+          <div class="step">1</div>
+          <h3>試験モード選択</h3>
+          <p>戦闘する試験モードを選択します</p>
+        </div>
+        <div class="guide-item">
+          <div class="step">2</div>
+          <h3>ステータス入力</h3>
+          <p>自分と相手の兵種ごとのステータスを入力</p>
+        </div>
+        <div class="guide-item">
+          <div class="step">3</div>
+          <h3>計算実行</h3>
+          <p>シミュレーション回数を設定して計算ボタンをクリック</p>
+        </div>
+        <div class="guide-item">
+          <div class="step">4</div>
+          <h3>結果確認</h3>
+          <p>勝率と詳細な分析結果を確認します</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="ad-bottom">
+      広告スペース (728×90)
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 Kingshot Battle Simulator | このツールはゲーム『Kingshot』のプレイヤー向けです</p>
+  </footer>
+
+  <script>
+    const PRESETS = {
+      balanced: {
+        infantry: { count: 50000, attack: 100, defense: 100, lethality: 100, health: 100 },
+        cavalry: { count: 50000, attack: 100, defense: 100, lethality: 100, health: 100 },
+        archery: { count: 50000, attack: 100, defense: 100, lethality: 100, health: 100 },
+      },
+      offensive: {
+        infantry: { count: 40000, attack: 150, defense: 80, lethality: 120, health: 90 },
+        cavalry: { count: 60000, attack: 160, defense: 70, lethality: 130, health: 80 },
+        archery: { count: 45000, attack: 140, defense: 75, lethality: 140, health: 85 },
+      },
+      defensive: {
+        infantry: { count: 60000, attack: 80, defense: 150, lethality: 80, health: 120 },
+        cavalry: { count: 45000, attack: 85, defense: 140, lethality: 85, health: 110 },
+        archery: { count: 55000, attack: 75, defense: 130, lethality: 90, health: 100 },
+      },
+    };
+
+    function applyPreset(presetName) {
+      const preset = PRESETS[presetName];
+      Object.keys(preset).forEach(troop => {
+        const stats = preset[troop];
+        document.getElementById(`player${troop.charAt(0).toUpperCase() + troop.slice(1)}Count`).value = stats.count;
+        document.getElementById(`player${troop.charAt(0).toUpperCase() + troop.slice(1)}Attack`).value = stats.attack;
+        document.getElementById(`player${troop.charAt(0).toUpperCase() + troop.slice(1)}Defense`).value = stats.defense;
+        document.getElementById(`player${troop.charAt(0).toUpperCase() + troop.slice(1)}Lethality`).value = stats.lethality;
+        document.getElementById(`player${troop.charAt(0).toUpperCase() + troop.slice(1)}Health`).value = stats.health;
+      });
+    }
+
+    function calculateBattle() {
+      const numberOfBattles = parseInt(document.getElementById('numberOfBattles').value) || 1000;
+
+      let wins = 0;
+      let totalDamage = 0;
+      let infantryDamage = 0;
+      let cavalryDamage = 0;
+      let archeryDamage = 0;
+
+      for (let i = 0; i < numberOfBattles; i++) {
+        const playerInfantry = parseInt(document.getElementById('playerInfantryCount').value);
+        const playerCavalry = parseInt(document.getElementById('playerCavalryCount').value);
+        const playerArchery = parseInt(document.getElementById('playerArcheryCount').value);
+
+        const opponentInfantry = parseInt(document.getElementById('opponentInfantryCount').value);
+        const opponentCavalry = parseInt(document.getElementById('opponentCavalryCount').value);
+        const opponentArchery = parseInt(document.getElementById('opponentArcheryCount').value);
+
+        // 簡略化されたシミュレーション
+        const playerTotalPower = playerInfantry + playerCavalry * 1.2 + playerArchery * 0.9;
+        const opponentTotalPower = opponentInfantry + opponentCavalry * 1.2 + opponentArchery * 0.9;
+
+        if (playerTotalPower > opponentTotalPower) {
+          wins++;
+        }
+
+        totalDamage += Math.random() * 1000;
+        infantryDamage += Math.random() * 1000;
+        cavalryDamage += Math.random() * 1200;
+        archeryDamage += Math.random() * 800;
+      }
+
+      const winRate = (wins / numberOfBattles) * 100;
+      const expectedDamage = totalDamage / numberOfBattles;
+      const totalDamageValue = infantryDamage + cavalryDamage + archeryDamage;
+
+      document.getElementById('winRateValue').textContent = winRate.toFixed(1) + '%';
+      document.getElementById('expectedDamageValue').textContent = expectedDamage.toFixed(0);
+      document.getElementById('resultsContainer').style.display = 'block';
+
+      // グラフ表示
+      const ctx = document.getElementById('damageChart').getContext('2d');
+      if (window.damageChart) {
+        window.damageChart.destroy();
+      }
+      window.damageChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['歩兵', '騎兵', '弓兵'],
+          datasets: [{
+            data: [
+              (infantryDamage / totalDamageValue * 100).toFixed(1),
+              (cavalryDamage / totalDamageValue * 100).toFixed(1),
+              (archeryDamage / totalDamageValue * 100).toFixed(1)
+            ],
+            backgroundColor: ['#4ade80', '#fbbf24', '#3b82f6'],
+            borderColor: '#1e293b',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: {
+                color: '#e2e8f0'
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // タブ切り替え
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
